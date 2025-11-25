@@ -15,16 +15,17 @@ fn logFromJavascript(
 ) callconv(.C) js.JSValueRef {
     const args = _arguments[0..argument_count];
     var input: js.JSStringRef = js.JSValueToStringCopy(ctx, args[0], null);
+    defer js.JSStringRelease(input);
 
     var buffer = allocator.alloc(u8, js.JSStringGetMaximumUTF8CStringSize(input)) catch unreachable;
     defer allocator.free(buffer);
 
     const string_length = js.JSStringGetUTF8CString(input, buffer.ptr, buffer.len);
-    const string = buffer[0..string_length];
-
-    var stdout = std.io.getStdOut();
-
-    stdout.writeAll(string) catch {};
+    if (string_length > 0) {
+        const string = buffer[0 .. string_length - 1];
+        const stdout = std.io.getStdOut().writer();
+        stdout.writeAll(string) catch {};
+    }
 
     return js.JSValueMakeUndefined(ctx);
 }
@@ -45,7 +46,7 @@ export fn sayHello() void {
     js.JSStringRelease(log_call_statement);
 }
 
-pub fn main() anyerror!void {
+pub fn main() !void {
     sayHello();
 }
 
