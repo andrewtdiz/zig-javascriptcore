@@ -23,7 +23,7 @@ Code looks like this (this is just `main.zig`):
 const std = @import("std");
 const testing = std.testing;
 
-const js = @import("./JavascriptCore.zig");
+const js = @import("./JavascriptCore.zig").JS;
 
 var allocator = std.heap.c_allocator;
 
@@ -34,7 +34,7 @@ fn logFromJavascript(
     argument_count: usize,
     _arguments: [*c]const js.JSValueRef,
     except: [*c]js.JSValueRef,
-) callconv(.C) js.JSValueRef {
+) callconv(.c) js.JSValueRef {
     const args = _arguments[0..argument_count];
     var input: js.JSStringRef = js.JSValueToStringCopy(ctx, args[0], null);
 
@@ -44,8 +44,7 @@ fn logFromJavascript(
     const string_length = js.JSStringGetUTF8CString(input, buffer.ptr, buffer.len);
     const string = buffer[0..string_length];
 
-    var stdout = std.io.getStdOut();
-
+    const stdout = std.fs.File.stdout();
     stdout.writeAll(string) catch {};
 
     return js.JSValueMakeUndefined(ctx);

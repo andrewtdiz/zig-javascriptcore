@@ -1,5 +1,5 @@
-const JavascriptCore = @This();
-
-pub usingnamespace @cImport({
-    @cInclude("JavascriptCore/JavascriptCore.h");
+pub const c = @cImport({
+    @cInclude("JavaScriptCore/JavaScriptCore.h");
 });
+
+pub const JS = c;
